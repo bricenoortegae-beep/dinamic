@@ -1,17 +1,23 @@
 cmake_minimum_required(VERSION 3.21)
-project(DynamicAssist)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(${PROJECT_NAME} SHARED)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-target_sources(${PROJECT_NAME}
-    PRIVATE
-    src/main.cpp
-)
+project(DynamicAssist VERSION 1.0.0)
 
-if(EXISTS "$ENV{GEODE_SDK}/cmake/GeodeSDK.cmake")
-    include("$ENV{GEODE_SDK}/cmake/GeodeSDK.cmake")
-elseif(EXISTS "$ENV{GEODE_SDK}/cmake/Geode.cmake")
-    include("$ENV{GEODE_SDK}/cmake/Geode.cmake")
+# Coge todos los .cpp dentro de src/ (recursivo)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+if (NOT DEFINED ENV{GEODE_SDK})
+    message(FATAL_ERROR "No se encontro GEODE_SDK en el entorno")
+else()
+    message(STATUS "Geode SDK encontrado en: $ENV{GEODE_SDK}")
 endif()
+
+add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+
+setup_geode_mod(${PROJECT_NAME})
