@@ -28,6 +28,9 @@ jobs:
         with:
           combine: true
           target: ${{ matrix.config.target }}
+          sdk: nightly
+          cli: nightly
+          configure-args: -DSKIP_BUILDING_CODEGEN=OFF
 
   package:
     name: Package builds
