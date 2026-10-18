@@ -50,13 +50,18 @@ class $modify(DynPlayer, PlayerObject) {
             f->queue.clear();
         } else {
             while (!f->queue.empty() && f->queue.front().first <= s_tick) {
-                const bool pulsacion = f->queue.front().second;
-                f->queue.pop_front();
-                if (pulsacion) PlayerObject::pushButton(PlayerButton::Jump);
-                else           PlayerObject::releaseButton(PlayerButton::Jump);
-            }
+                const bool pushButton(PlayerButton btn) override {
+        if (btn != PlayerButton::Jump || !activo() || ventana() == 0) {
+            return PlayerObject::pushButton(btn);
         }
-
-        PlayerObject::update(dt);
+        m_fields->queue.emplace_back(s_tick + ventana(), true);
+        return true;
     }
-};
+
+    bool releaseButton(PlayerButton btn) override {
+        if (btn != PlayerButton::Jump || !activo() || ventana() == 0) {
+            return PlayerObject::releaseButton(btn);
+        }
+        m_fields->queue.emplace_back(s_tick + ventana(), false);
+        return true;
+    }
