@@ -23,7 +23,7 @@ class $modify(DynPlayer, PlayerObject) {
         return (uint64_t)std::clamp<int64_t>(w, 0, 16);
     }
 
-    bool pushButton(PlayerButton btn) override {
+    bool pushButton(PlayerButton btn) {
         if (btn != PlayerButton::Jump || !activo() || ventana() == 0) {
             return PlayerObject::pushButton(btn);
         }
@@ -31,7 +31,7 @@ class $modify(DynPlayer, PlayerObject) {
         return true;
     }
 
-    bool releaseButton(PlayerButton btn) override {
+    bool releaseButton(PlayerButton btn) {
         if (btn != PlayerButton::Jump || !activo() || ventana() == 0) {
             return PlayerObject::releaseButton(btn);
         }
