@@ -1,18 +1,8 @@
-#include <Geode/Geode.hpp>
-#include <Geode/modify/PlayerObject.hpp>
-
-#include <algorithm>
-#include <deque>
-#include <utility>
-
-using namespace geode::prelude;
-
 class $modify(DynPlayer, PlayerObject) {
     struct Fields {
         std::deque<std::pair<uint64_t, bool>> queue;
+        uint64_t tick = 0;
     };
-
-    static inline uint64_t s_tick = 0;
 
     static bool activo() {
         return Mod::get()->getSettingValue<bool>("enabled");
@@ -27,7 +17,8 @@ class $modify(DynPlayer, PlayerObject) {
         if (btn != PlayerButton::Jump || !activo() || ventana() == 0) {
             return PlayerObject::pushButton(btn);
         }
-        m_fields->queue.emplace_back(s_tick + ventana(), true);
+        auto f = m_fields.self();
+        f->queue.emplace_back(f->tick + ventana(), true);
         return true;
     }
 
@@ -35,21 +26,21 @@ class $modify(DynPlayer, PlayerObject) {
         if (btn != PlayerButton::Jump || !activo() || ventana() == 0) {
             return PlayerObject::releaseButton(btn);
         }
-        m_fields->queue.emplace_back(s_tick + ventana(), false);
+        auto f = m_fields.self();
+        f->queue.emplace_back(f->tick + ventana(), false);
         return true;
     }
 
     void update(float dt) override {
-        if (m_gameLayer && m_gameLayer->m_player1 == this) {
-            ++s_tick;
-        }
-
         auto f = m_fields.self();
+        ++f->tick;
 
         if (m_isDead) {
             f->queue.clear();
         } else {
-            while (!f->queue.empty() && f->queue.front().first <= s_tick) {
+            // si desactivas el mod o pones ventana 0, suelta todo lo pendiente
+            bool vaciar = !activo() || ventana() == 0;
+            while (!f->queue.empty() && (vaciar || f->queue.front().first <= f->tick)) {
                 const bool pulsacion = f->queue.front().second;
                 f->queue.pop_front();
                 if (pulsacion) (void)PlayerObject::pushButton(PlayerButton::Jump);
