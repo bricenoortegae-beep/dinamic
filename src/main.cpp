@@ -1,3 +1,12 @@
+#include <Geode/Geode.hpp>
+#include <Geode/modify/PlayerObject.hpp>
+#include <algorithm>
+#include <cstdint>
+#include <deque>
+#include <utility>
+
+using namespace geode::prelude;
+
 class $modify(DynPlayer, PlayerObject) {
     struct Fields {
         std::deque<std::pair<uint64_t, bool>> queue;
